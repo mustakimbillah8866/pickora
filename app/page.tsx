@@ -3,6 +3,7 @@ import { supabase } from './supabaseClient'
 import ProductCard from './ProductCard'
 import CartButton from './CartButton'
 import HeroBanner from './HeroBanner'
+import CategoryRow from './CategoryRow'
 
 export default async function Home() {
   const { data: products } = await supabase.from('products').select('*').eq('is_active', true)
@@ -56,11 +57,19 @@ export default async function Home() {
           ))}
         </div>
 
-        {/* পণ্য */}
-        <h2 className="text-center text-xl font-bold mb-5">আমাদের পণ্য</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {products && products.map((p) => <ProductCard key={p.id} p={p} />)}
-        </div>
+        {/* ক্যাটাগরি অনুযায়ী সেকশন */}
+        {cats.map((c: any) => (
+          <CategoryRow
+            key={c.id}
+            title={c.name}
+            products={(products || []).filter((p) => p.category === c.name)}
+          />
+        ))}
+        {/* ক্যাটাগরিহীন পণ্য (যদি থাকে) */}
+        <CategoryRow
+          title="অন্যান্য পণ্য"
+          products={(products || []).filter((p) => !cats.some((c: any) => c.name === p.category))}
+        />
 
         {/* ট্রাস্ট ব্যাজ */}
         <div className="flex flex-wrap gap-4 justify-center bg-white rounded-xl p-4 mt-10 text-sm text-gray-600 shadow-sm">
