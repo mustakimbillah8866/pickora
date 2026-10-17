@@ -5,7 +5,11 @@ export default function ProductCard({ p }: { p: any }) {
   const { add } = useCart()
   return (
     <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition group">
-      <div className="h-32 bg-emerald-50 flex items-center justify-center text-4xl group-hover:scale-105 transition">📦</div>
+            <div className="h-32 bg-emerald-50 flex items-center justify-center overflow-hidden">
+        {p.image_url
+          ? <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition" />
+          : <span className="text-4xl">📦</span>}
+      </div>
       <div className="p-3">
         <div className="font-medium text-sm leading-snug min-h-[38px] line-clamp-2">{p.name}</div>
         <div className="text-gray-400 text-xs mt-0.5 mb-1">{p.category}</div>
