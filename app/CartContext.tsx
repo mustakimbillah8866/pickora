@@ -14,17 +14,23 @@ type CartType = {
 }
 
 const CartContext = createContext<CartType | null>(null)
+const KEY = 'pickora_cart'
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<Item[]>([])
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem('pickora_cart')
-    if (saved) setItems(JSON.parse(saved))
+    try {
+      const saved = localStorage.getItem(KEY)
+      if (saved) setItems(JSON.parse(saved))
+    } catch {}
+    setReady(true)
   }, [])
+
   useEffect(() => {
-    localStorage.setItem('pickora_cart', JSON.stringify(items))
-  }, [items])
+    if (ready) localStorage.setItem(KEY, JSON.stringify(items))
+  }, [items, ready])
 
   function add(p: { id: number; name: string; price: number }) {
     setItems(prev => {

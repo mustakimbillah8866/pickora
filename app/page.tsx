@@ -9,7 +9,8 @@ export default async function Home() {
     .select('*')
     .eq('is_active', true)
 
-  const cats = ['সব', 'ফ্যাশন', 'পোশাক', 'অর্গানিক খাবার', 'খেলনা', 'অন্যান্য']
+    const { data: catData } = await supabase.from('categories').select('name').order('id')
+  const cats = ['সব', ...(catData?.map(c => c.name) || [])]
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
@@ -46,7 +47,7 @@ export default async function Home() {
         {/* ক্যাটাগরি */}
         <div className="flex gap-2 flex-wrap mb-6">
           {cats.map((c) => (
-            <span key={c}
+            <span key={c as string}
               className={`px-4 py-1.5 rounded-full text-sm cursor-pointer border transition ${c === 'সব' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-400'}`}>
               {c}
             </span>
