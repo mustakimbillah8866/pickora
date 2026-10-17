@@ -46,6 +46,10 @@ export default function Admin() {
     setName(''); setPrice(''); setCategory(''); setStock(''); loadProducts()
   }
   async function del(id: number) { await supabase.from('products').delete().eq('id', id); loadProducts() }
+  async function updateStatus(id: number, status: string) {
+    await supabase.from('orders').update({ status }).eq('id', id)
+    loadOrders()
+  }
 
   const box = "w-full border border-gray-200 rounded-lg px-3 py-2 mb-2 text-sm"
   const btn = "bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm"
@@ -71,7 +75,6 @@ export default function Admin() {
         <button onClick={logout} className="bg-gray-500 text-white rounded-lg px-4 py-2 text-sm">লগআউট</button>
       </div>
 
-      {/* ট্যাব */}
       <div className="flex gap-2 mb-4">
         <button onClick={() => setTab('products')} className={`px-4 py-2 rounded-lg text-sm ${tab === 'products' ? 'bg-emerald-600 text-white' : 'bg-gray-100'}`}>পণ্য</button>
         <button onClick={() => setTab('orders')} className={`px-4 py-2 rounded-lg text-sm ${tab === 'orders' ? 'bg-emerald-600 text-white' : 'bg-gray-100'}`}>অর্ডার ({orders.length})</button>
@@ -116,7 +119,19 @@ export default function Admin() {
               <div className="text-xs text-gray-400 mt-1">
                 পণ্য: {Array.isArray(o.items) ? o.items.map((i: any) => `${i.name} ×${i.qty}`).join(', ') : ''}
               </div>
-              <div className="text-xs mt-1">অবস্থা: <span className="text-amber-600">{o.status}</span></div>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-xs">অবস্থা:</span>
+                <select
+                  value={o.status}
+                  onChange={e => updateStatus(o.id, e.target.value)}
+                  className="text-xs border rounded px-2 py-1">
+                  <option value="নতুন">নতুন</option>
+                  <option value="প্রসেসিং">প্রসেসিং</option>
+                  <option value="পাঠানো হয়েছে">পাঠানো হয়েছে</option>
+                  <option value="ডেলিভারি হয়েছে">ডেলিভারি হয়েছে</option>
+                  <option value="বাতিল">বাতিল</option>
+                </select>
+              </div>
             </div>
           ))}
         </>
