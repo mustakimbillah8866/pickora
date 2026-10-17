@@ -14,6 +14,8 @@ export default function Checkout() {
   const [delOut, setDelOut] = useState(130)
   const [freeMin, setFreeMin] = useState(0)
   const [done, setDone] = useState(false)
+  const [orderId, setOrderId] = useState<number | null>(null)
+  const [orderCode, setOrderCode] = useState('')
   const [err, setErr] = useState('')
 
   useEffect(() => {
@@ -33,28 +35,42 @@ export default function Checkout() {
     setErr('')
     if (!name || !phone || !address) { setErr('নাম, ফোন ও ঠিকানা দিন।'); return }
     if (items.length === 0) { setErr('কার্ট খালি।'); return }
-    const { error } = await supabase.from('orders').insert({
+    // আজকের তারিখ (YYYYMMDD)
+    const d = new Date()
+    const dateStr = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
+    // আজকের অর্ডার সংখ্যা গুনে সিরিয়াল
+    const startOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString()
+    const { count } = await supabase.from('orders').select('*', { count: 'exact', head: true }).gte('created_at', startOfDay)
+    const serial = String((count || 0) + 1).padStart(2, '0')
+    const random6 = String(Math.floor(100000 + Math.random() * 900000))
+    const code = `PICK-${dateStr}${serial}-${random6}`
+
+    const { data, error } = await supabase.from('orders').insert({
+      order_code: code,
       customer_name: name, customer_phone: phone,
       customer_address: address + ' (' + (location === 'inside' ? 'ঢাকার ভিতরে' : 'ঢাকার বাইরে') + ')',
       items: items, total: grandTotal
-    })
+    }).select('id').single()
     if (error) { setErr('সমস্যা: ' + error.message); return }
-    clear(); setDone(true)
+    setOrderId(data?.id ?? null); setOrderCode(code); clear(); setDone(true)
   }
 
   const box = "w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
 
   if (done) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="bg-white rounded-xl p-8 text-center shadow-sm">
+      <div className="bg-white rounded-xl p-8 text-center shadow-sm max-w-sm">
         <div className="text-5xl mb-3">✅</div>
         <h1 className="text-xl font-bold mb-2">অর্ডার সফল হয়েছে!</h1>
-        <p className="text-gray-500 mb-4">আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।</p>
-        <Link href="/" className="text-orange-600">আরও কেনাকাটা করুন →</Link>
+        {orderCode && <div className="bg-orange-50 rounded-lg p-3 mb-3"><div className="text-sm text-gray-600">আপনার অর্ডার কোড</div><div className="text-lg font-bold text-orange-600 break-all">{orderCode}</div></div>}
+        <p className="text-gray-500 text-sm mb-4">এই নম্বরটি রাখুন — অর্ডার ট্র্যাক করতে কাজে লাগবে। আমরা শীঘ্রই যোগাযোগ করব।</p>
+        <div className="flex gap-2">
+          <Link href="/" className="flex-1 border border-orange-500 text-orange-600 rounded-lg py-2 text-sm">হোমে যান</Link>
+          <Link href="/track" className="flex-1 bg-orange-500 text-white rounded-lg py-2 text-sm">অর্ডার ট্র্যাক</Link>
+        </div>
       </div>
     </div>
   )
-
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm px-4 py-3">

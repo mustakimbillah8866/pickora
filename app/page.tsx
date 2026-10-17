@@ -32,6 +32,7 @@ export default async function Home() {
             <input placeholder="পণ্য, ব্র্যান্ড বা ক্যাটাগরি খুঁজুন…" className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
           </div>
+          <a href="/track" className="text-sm text-gray-600 hover:text-orange-500 whitespace-nowrap">📦 অর্ডার ট্র্যাক</a>
           <CartButton />
         </div>
         {/* ক্যাটাগরি মেনু বার */}

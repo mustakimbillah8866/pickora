@@ -1,10 +1,10 @@
 'use client'
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
-type Item = { id: number; name: string; price: number; qty: number }
+type Item = { id: number; name: string; price: number; qty: number; image?: string }
 type CartType = {
   items: Item[]
-  add: (p: { id: number; name: string; price: number }) => void
+  add: (p: { id: number; name: string; price: number; image?: string }) => void
   inc: (id: number) => void
   dec: (id: number) => void
   remove: (id: number) => void
@@ -32,7 +32,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (ready) localStorage.setItem(KEY, JSON.stringify(items))
   }, [items, ready])
 
-  function add(p: { id: number; name: string; price: number }) {
+  function add(p: { id: number; name: string; price: number; image?: string }) {
     setItems(prev => {
       const found = prev.find(i => i.id === p.id)
       if (found) return prev.map(i => i.id === p.id ? { ...i, qty: i.qty + 1 } : i)

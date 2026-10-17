@@ -8,7 +8,7 @@ export default function ProductCard({ p }: { p: any }) {
   const hasDiscount = p.old_price && p.old_price > p.price
 
   function buyNow() {
-    add({ id: p.id, name: p.name, price: p.price })
+    add({ id: p.id, name: p.name, price: p.price, image: p.image_url })
     router.push('/checkout')
   }
 
@@ -41,7 +41,7 @@ export default function ProductCard({ p }: { p: any }) {
         )}
         <div className="flex gap-1.5 mt-1">
           <button
-            onClick={() => add({ id: p.id, name: p.name, price: p.price })}
+            onClick={() => add({ id: p.id, name: p.name, price: p.price, image: p.image_url })}
             className="flex-1 py-2 border border-orange-500 text-orange-600 hover:bg-orange-50 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1 active:scale-95">
             🛒 কার্টে
           </button>
