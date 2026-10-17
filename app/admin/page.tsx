@@ -9,7 +9,7 @@ export default function Admin() {
   const [pass, setPass] = useState('')
   const [loginErr, setLoginErr] = useState('')
 
-  const [tab, setTab] = useState<'products' | 'orders' | 'banners' | 'brands' | 'categories'>('products')
+  const [tab, setTab] = useState<'products' | 'orders' | 'banners' | 'brands' | 'categories' | 'settings'>('products')
   const [products, setProducts] = useState<any[]>([])
   const [orders, setOrders] = useState<any[]>([])
   const [cats, setCats] = useState<any[]>([])
@@ -24,21 +24,24 @@ export default function Admin() {
   const [brand, setBrand] = useState('')
   const [stock, setStock] = useState('')
   const [imageUrl, setImageUrl] = useState('')
-  const [uploading, setUploading] = useState(false)
   const [msg, setMsg] = useState('')
 
   const [bImage, setBImage] = useState('')
   const [bTitle, setBTitle] = useState('')
   const [bSub, setBSub] = useState('')
-  const [bUploading, setBUploading] = useState(false)
   const [bMsg, setBMsg] = useState('')
 
   const [brName, setBrName] = useState('')
+  const [brLogo, setBrLogo] = useState('')
+  const [brMsg, setBrMsg] = useState('')
+
   const [catName, setCatName] = useState('')
   const [catMsg, setCatMsg] = useState('')
-  const [brLogo, setBrLogo] = useState('')
-  const [brUploading, setBrUploading] = useState(false)
-  const [brMsg, setBrMsg] = useState('')
+
+  const [delIn, setDelIn] = useState('')
+  const [delOut, setDelOut] = useState('')
+  const [freeMin, setFreeMin] = useState('')
+  const [setMsg2, setSetMsg2] = useState('')
 
   const [cropSrc, setCropSrc] = useState('')
   const [cropAspect, setCropAspect] = useState(1)
@@ -49,7 +52,7 @@ export default function Admin() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setUser(s?.user ?? null))
     return () => sub.subscription.unsubscribe()
   }, [])
-  useEffect(() => { if (user) { loadProducts(); loadOrders(); loadCats(); loadBanners(); loadBrands() } }, [user])
+  useEffect(() => { if (user) { loadProducts(); loadOrders(); loadCats(); loadBanners(); loadBrands(); loadSettings() } }, [user])
 
   async function login() {
     setLoginErr('')
@@ -62,6 +65,19 @@ export default function Admin() {
   async function loadCats() { const { data } = await supabase.from('categories').select('*').order('id'); setCats(data || []) }
   async function loadBanners() { const { data } = await supabase.from('banners').select('*').order('id', { ascending: false }); setBanners(data || []) }
   async function loadBrands() { const { data } = await supabase.from('brands').select('*').order('id', { ascending: false }); setBrands(data || []) }
+  async function loadSettings() {
+    const { data } = await supabase.from('settings').select('*')
+    const m: any = {}; (data || []).forEach((s: any) => m[s.key] = s.value)
+    setDelIn(m.delivery_inside_dhaka || ''); setDelOut(m.delivery_outside_dhaka || ''); setFreeMin(m.free_delivery_min || '')
+  }
+  async function saveSettings() {
+    await supabase.from('settings').upsert([
+      { key: 'delivery_inside_dhaka', value: delIn },
+      { key: 'delivery_outside_dhaka', value: delOut },
+      { key: 'free_delivery_min', value: freeMin },
+    ])
+    setSetMsg2('সেটিংস সেভ হয়েছে ✅')
+  }
 
   async function uploadBlob(blob: Blob): Promise<string | null> {
     const auth = await (await fetch('/api/upload-auth')).json()
@@ -78,13 +94,10 @@ export default function Admin() {
   }
 
   function pickFile(file: File, forWhat: 'product' | 'banner' | 'brand') {
-    setCropFor(forWhat)
-    setCropAspect(forWhat === 'banner' ? 3 / 1 : 1)
-    setCropSrc(URL.createObjectURL(file))
+    setCropFor(forWhat); setCropAspect(forWhat === 'banner' ? 3 / 1 : 1); setCropSrc(URL.createObjectURL(file))
   }
   async function onCropDone(blob: Blob) {
-    const forWhat = cropFor
-    setCropSrc('')
+    const forWhat = cropFor; setCropSrc('')
     const url = await uploadBlob(blob)
     if (forWhat === 'banner') { setBImage(url || ''); setBMsg(url ? 'ছবি আপলোড হয়েছে ✅' : 'ব্যর্থ') }
     else if (forWhat === 'brand') { setBrLogo(url || ''); setBrMsg(url ? 'লোগো আপলোড হয়েছে ✅' : 'ব্যর্থ') }
@@ -125,7 +138,8 @@ export default function Admin() {
     setBrMsg('ব্র্যান্ড যোগ হয়েছে ✅'); setBrName(''); setBrLogo(''); loadBrands()
   }
   async function delBrand(id: number) { await supabase.from('brands').delete().eq('id', id); loadBrands() }
-    async function addCat() {
+
+  async function addCat() {
     if (!catName) { setCatMsg('ক্যাটাগরির নাম দিন।'); return }
     const { error } = await supabase.from('categories').insert({ name: catName })
     if (error) { setCatMsg('সমস্যা: ' + error.message); return }
@@ -161,6 +175,7 @@ export default function Admin() {
         <button onClick={() => setTab('banners')} className={`px-4 py-2 rounded-lg text-sm ${tab === 'banners' ? 'bg-orange-500 text-white' : 'bg-gray-100'}`}>ব্যানার ({banners.length})</button>
         <button onClick={() => setTab('brands')} className={`px-4 py-2 rounded-lg text-sm ${tab === 'brands' ? 'bg-orange-500 text-white' : 'bg-gray-100'}`}>ব্র্যান্ড ({brands.length})</button>
         <button onClick={() => setTab('categories')} className={`px-4 py-2 rounded-lg text-sm ${tab === 'categories' ? 'bg-orange-500 text-white' : 'bg-gray-100'}`}>ক্যাটাগরি ({cats.length})</button>
+        <button onClick={() => setTab('settings')} className={`px-4 py-2 rounded-lg text-sm ${tab === 'settings' ? 'bg-orange-500 text-white' : 'bg-gray-100'}`}>সেটিংস</button>
       </div>
 
       {tab === 'products' && (
@@ -181,7 +196,6 @@ export default function Admin() {
             <input className={box} type="number" placeholder="স্টক" value={stock} onChange={e => setStock(e.target.value)} />
             <label className="block text-sm mb-1 text-gray-600">পণ্যের ছবি (বর্গাকার):</label>
             <input type="file" accept="image/*" className="mb-2 text-sm" onChange={e => { const f = e.target.files?.[0]; if (f) pickFile(f, 'product'); e.target.value = '' }} />
-            {uploading && <div className="text-sm text-amber-600 mb-2">আপলোড হচ্ছে…</div>}
             {imageUrl && <img src={imageUrl} alt="preview" className="w-20 h-20 object-cover rounded mb-2" />}
             <div className="flex gap-2">
               <button className={btn} onClick={saveProduct}>{editId ? 'আপডেট করুন' : 'পণ্য যোগ করুন'}</button>
@@ -195,7 +209,7 @@ export default function Admin() {
               {p.image_url && <img src={p.image_url} alt="" className="w-10 h-10 object-cover rounded" />}
               <div className="flex-1">
                 <div className="font-medium">{p.name}</div>
-                <div className="text-gray-500 text-xs">{p.category} · ৳{p.price}{p.old_price ? ` (আসল ৳${p.old_price})` : ''} · স্টক: {p.stock}</div>
+                <div className="text-gray-500 text-xs">{p.brand ? p.brand + ' · ' : ''}{p.category} · ৳{p.price}{p.old_price ? ` (আসল ৳${p.old_price})` : ''} · স্টক: {p.stock}</div>
               </div>
               <button onClick={() => startEdit(p)} className="text-blue-600 border border-blue-200 rounded px-2 py-1 text-xs">এডিট</button>
               <button onClick={() => del(p.id)} className="text-red-500 border border-red-200 rounded px-2 py-1 text-xs">মুছুন</button>
@@ -270,6 +284,7 @@ export default function Admin() {
           ))}
         </>
       )}
+
       {tab === 'categories' && (
         <>
           <div className="bg-gray-50 border rounded-xl p-4 mb-5">
@@ -286,7 +301,21 @@ export default function Admin() {
             </div>
           ))}
         </>
-      )}      
+      )}
+
+      {tab === 'settings' && (
+        <div className="bg-gray-50 border rounded-xl p-4 max-w-md">
+          <h2 className="font-semibold mb-3">ডেলিভারি চার্জ সেটিংস</h2>
+          <label className="block text-sm mb-1 text-gray-600">ঢাকার ভিতরে (৳):</label>
+          <input className={box} type="number" value={delIn} onChange={e => setDelIn(e.target.value)} />
+          <label className="block text-sm mb-1 text-gray-600">ঢাকার বাইরে (৳):</label>
+          <input className={box} type="number" value={delOut} onChange={e => setDelOut(e.target.value)} />
+          <label className="block text-sm mb-1 text-gray-600">৳___ এর বেশি অর্ডারে ফ্রি ডেলিভারি (০ = বন্ধ):</label>
+          <input className={box} type="number" value={freeMin} onChange={e => setFreeMin(e.target.value)} />
+          <button className={btn} onClick={saveSettings}>সেভ করুন</button>
+          {setMsg2 && <div className="mt-2 text-orange-600 text-sm">{setMsg2}</div>}
+        </div>
+      )}
     </div>
   )
 }
