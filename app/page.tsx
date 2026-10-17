@@ -1,4 +1,7 @@
+export const instant = false
 import { supabase } from './supabaseClient'
+import ProductCard from './ProductCard'
+import CartButton from './CartButton'
 
 export default async function Home() {
   const { data: products } = await supabase
@@ -9,50 +12,69 @@ export default async function Home() {
   const cats = ['সব', 'ফ্যাশন', 'পোশাক', 'অর্গানিক খাবার', 'খেলনা', 'অন্যান্য']
 
   return (
-    <div style={{ fontFamily: 'sans-serif', color: '#1f2937', background: '#f9fafb', minHeight: '100vh' }}>
-      <header style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 36, height: 36, borderRadius: 10, background: '#1D9E75', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🛒</span>
-          <span style={{ fontSize: 20, fontWeight: 700 }}>Pickora</span>
-        </div>
-        <input placeholder="পণ্য খুঁজুন…" style={{ flex: 1, minWidth: 160, padding: '8px 12px', border: '1px solid #ddd', borderRadius: 8 }} />
-        <button style={{ padding: '8px 14px', background: '#1D9E75', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>কার্ট</button>
-      </header>
-
-      <div style={{ background: '#1D9E75', color: '#fff', padding: '28px 20px', textAlign: 'center' }}>
-        <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 6 }}>ঘরের সব প্রয়োজন, এক ঠিকানায়</div>
-        <div style={{ opacity: 0.9 }}>ফ্যাশন · পোশাক · খাঁটি খাবার · খেলনা</div>
+    <div className="min-h-screen bg-gray-50 text-gray-800">
+      {/* টপ বার */}
+      <div className="bg-emerald-700 text-white text-xs text-center py-1.5 px-4">
+        🚚 সারা দেশে ডেলিভারি · ১০০% আসল পণ্য · ক্যাশ অন ডেলিভারি
       </div>
 
-      <main style={{ maxWidth: 1000, margin: '0 auto', padding: 20 }}>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+      {/* হেডার */}
+      <header className="sticky top-0 z-20 bg-white shadow-sm">
+        <div className="max-w-6xl mx-auto flex items-center gap-3 px-4 py-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl">🛒</span>
+            <span className="text-xl font-bold text-emerald-700">Pickora</span>
+          </div>
+          <div className="flex-1 min-w-[160px] relative">
+            <input placeholder="পণ্য, ব্র্যান্ড বা ক্যাটাগরি খুঁজুন…"
+              className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+          </div>
+          <CartButton />
+        </div>
+      </header>
+
+      {/* হিরো */}
+      <section className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white">
+        <div className="max-w-6xl mx-auto px-4 py-10 text-center">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">ঘরের সব প্রয়োজন, এক ঠিকানায়</h1>
+          <p className="opacity-90">ফ্যাশন · পোশাক · খাঁটি খাবার · খেলনা — বাছাই করা পণ্য সেরা দামে</p>
+        </div>
+      </section>
+
+      <main className="max-w-6xl mx-auto px-4 py-6">
+        {/* ক্যাটাগরি */}
+        <div className="flex gap-2 flex-wrap mb-6">
           {cats.map((c) => (
-            <span key={c} style={{ padding: '6px 14px', background: c === 'সব' ? '#1D9E75' : '#fff', color: c === 'সব' ? '#fff' : '#333', border: '1px solid #ddd', borderRadius: 999, fontSize: 14, cursor: 'pointer' }}>{c}</span>
+            <span key={c}
+              className={`px-4 py-1.5 rounded-full text-sm cursor-pointer border transition ${c === 'সব' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-400'}`}>
+              {c}
+            </span>
           ))}
         </div>
 
-        <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 14 }}>আমাদের পণ্য</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 16 }}>
-          {products && products.map((p) => (
-            <div key={p.id} style={{ background: '#fff', border: '1px solid #eee', borderRadius: 12, overflow: 'hidden' }}>
-              <div style={{ height: 120, background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>📦</div>
-              <div style={{ padding: 12 }}>
-                <div style={{ fontWeight: 600, fontSize: 14, minHeight: 38 }}>{p.name}</div>
-                <div style={{ color: '#888', fontSize: 12, margin: '2px 0 6px' }}>{p.category}</div>
-                <div style={{ fontWeight: 700, color: '#1D9E75', marginBottom: 8 }}>৳{p.price}</div>
-                <button style={{ width: '100%', padding: 6, background: '#1D9E75', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>কার্টে যোগ</button>
-              </div>
-            </div>
-          ))}
+        <h2 className="text-lg font-semibold mb-4">বাছাই করা পণ্য</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {products && products.map((p) => <ProductCard key={p.id} p={p} />)}
         </div>
 
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', background: '#fff', borderRadius: 12, padding: 16, marginTop: 24, justifyContent: 'center', fontSize: 13, color: '#555' }}>
+        {/* ট্রাস্ট ব্যাজ */}
+        <div className="flex flex-wrap gap-4 justify-center bg-white rounded-xl p-4 mt-8 text-sm text-gray-600 shadow-sm">
           <span>🚚 দ্রুত হোম ডেলিভারি</span>
           <span>💵 ক্যাশ অন ডেলিভারি</span>
           <span>🔄 সহজ রিটার্ন</span>
           <span>✅ ১০০% আসল পণ্য</span>
         </div>
       </main>
+
+      {/* ফুটার */}
+      <footer className="bg-gray-900 text-gray-300 mt-10">
+        <div className="max-w-6xl mx-auto px-4 py-6 text-center text-sm">
+          <div className="text-emerald-400 font-bold text-lg mb-1">Pickora</div>
+          <p>ঘরের সব প্রয়োজন, এক ঠিকানায়</p>
+          <p className="mt-2 text-gray-500">© 2026 Pickora. সর্বস্বত্ব সংরক্ষিত।</p>
+        </div>
+      </footer>
     </div>
   )
 }
