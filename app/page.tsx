@@ -5,58 +5,65 @@ import CartButton from './CartButton'
 import HeroBanner from './HeroBanner'
 
 export default async function Home() {
-  const { data: products } = await supabase
-    .from('products')
-    .select('*')
-    .eq('is_active', true)
+  const { data: products } = await supabase.from('products').select('*').eq('is_active', true)
+  const { data: catData } = await supabase.from('categories').select('*').order('id')
+  const cats = catData || []
 
-    const { data: catData } = await supabase.from('categories').select('name').order('id')
-  const cats = ['সব', ...(catData?.map(c => c.name) || [])]
+  const catIcon: any = { 'ফ্যাশন': '👗', 'পোশাক': '👕', 'অর্গানিক খাবার': '🥗', 'খেলনা': '🧸', 'অন্যান্য': '🛍️', 'মধু': '🍯', 'তেল ও ঘি': '🫗', 'খেজুর': '🌴', 'মসলা': '🌶️' }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
       {/* টপ বার */}
-      <div className="bg-emerald-700 text-white text-xs text-center py-1.5 px-4">
-        🚚 সারা দেশে ডেলিভারি · ১০০% আসল পণ্য · ক্যাশ অন ডেলিভারি
+      <div className="bg-orange-600 text-white text-xs text-center py-1.5 px-4">
+        🚚 সারা দেশে ডেলিভারি · ১০০% আসল পণ্য · ক্যাশ অন ডেলিভারি · হেল্পলাইন: ০৯৬XX-XXXXXX
       </div>
 
       {/* হেডার */}
-      <header className="sticky top-0 z-20 bg-white shadow-sm">
+      <header className="bg-white shadow-sm sticky top-0 z-20">
         <div className="max-w-6xl mx-auto flex items-center gap-3 px-4 py-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl">🛒</span>
-            <span className="text-xl font-bold text-emerald-700">Pickora</span>
+            <span className="w-9 h-9 rounded-lg bg-orange-500 text-white flex items-center justify-center text-xl">🛒</span>
+            <span className="text-xl font-bold text-orange-600">Pickora</span>
           </div>
           <div className="flex-1 min-w-[160px] relative">
-            <input placeholder="পণ্য, ব্র্যান্ড বা ক্যাটাগরি খুঁজুন…"
-              className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+            <input placeholder="পণ্য, ব্র্যান্ড বা ক্যাটাগরি খুঁজুন…" className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
           </div>
           <CartButton />
         </div>
+        {/* ক্যাটাগরি মেনু বার */}
+        <div className="bg-gray-900 text-white text-sm">
+          <div className="max-w-6xl mx-auto px-4 py-2 flex gap-5 overflow-x-auto whitespace-nowrap">
+            <span className="cursor-pointer hover:text-orange-400">সব পণ্য</span>
+            {cats.map((c: any) => <span key={c.id} className="cursor-pointer hover:text-orange-400">{c.name}</span>)}
+          </div>
+        </div>
       </header>
 
-      {/* হিরো */}
       <HeroBanner />
 
       <main className="max-w-6xl mx-auto px-4 py-6">
-        {/* ক্যাটাগরি */}
-        <div className="flex gap-2 flex-wrap mb-6">
-          {cats.map((c) => (
-            <span key={c as string}
-              className={`px-4 py-1.5 rounded-full text-sm cursor-pointer border transition ${c === 'সব' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-400'}`}>
-              {c}
-            </span>
+        {/* Featured Categories */}
+        <h2 className="text-center text-xl font-bold mb-5 mt-2">ক্যাটাগরি</h2>
+        <div className="flex gap-4 overflow-x-auto pb-3 mb-8 justify-start md:justify-center">
+          {cats.map((c: any) => (
+            <div key={c.id} className="flex flex-col items-center gap-2 flex-shrink-0 w-24 cursor-pointer group">
+              <div className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center text-3xl group-hover:shadow-md group-hover:border-orange-200 transition">
+                {catIcon[c.name] || '🏷️'}
+              </div>
+              <span className="text-xs text-center">{c.name}</span>
+            </div>
           ))}
         </div>
 
-        <h2 className="text-lg font-semibold mb-4">বাছাই করা পণ্য</h2>
+        {/* পণ্য */}
+        <h2 className="text-center text-xl font-bold mb-5">আমাদের পণ্য</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {products && products.map((p) => <ProductCard key={p.id} p={p} />)}
         </div>
 
         {/* ট্রাস্ট ব্যাজ */}
-        <div className="flex flex-wrap gap-4 justify-center bg-white rounded-xl p-4 mt-8 text-sm text-gray-600 shadow-sm">
+        <div className="flex flex-wrap gap-4 justify-center bg-white rounded-xl p-4 mt-10 text-sm text-gray-600 shadow-sm">
           <span>🚚 দ্রুত হোম ডেলিভারি</span>
           <span>💵 ক্যাশ অন ডেলিভারি</span>
           <span>🔄 সহজ রিটার্ন</span>
@@ -64,12 +71,41 @@ export default async function Home() {
         </div>
       </main>
 
-      {/* ফুটার */}
-      <footer className="bg-gray-900 text-gray-300 mt-10">
-        <div className="max-w-6xl mx-auto px-4 py-6 text-center text-sm">
-          <div className="text-emerald-400 font-bold text-lg mb-1">Pickora</div>
-          <p>ঘরের সব প্রয়োজন, এক ঠিকানায়</p>
-          <p className="mt-2 text-gray-500">© 2026 Pickora. সর্বস্বত্ব সংরক্ষিত।</p>
+      {/* বড় ফুটার */}
+      <footer className="bg-gray-900 text-gray-300 mt-12">
+        <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+          <div>
+            <div className="text-orange-400 font-bold text-lg mb-2">Pickora</div>
+            <p className="text-gray-400 leading-relaxed">ঘরের সব প্রয়োজন, এক ঠিকানায়। নিরাপদ ও বিশ্বস্ত অনলাইন শপিং।</p>
+            <div className="mt-3 text-gray-400">📍 ঢাকা, বাংলাদেশ<br/>📞 ০৯৬XX-XXXXXX<br/>✉️ info@pickora.com</div>
+          </div>
+          <div>
+            <div className="font-semibold text-white mb-3">তথ্য</div>
+            <ul className="space-y-2 text-gray-400">
+              <li className="hover:text-orange-400 cursor-pointer">আমাদের সম্পর্কে</li>
+              <li className="hover:text-orange-400 cursor-pointer">যোগাযোগ</li>
+              <li className="hover:text-orange-400 cursor-pointer">শর্তাবলী</li>
+              <li className="hover:text-orange-400 cursor-pointer">প্রাইভেসি পলিসি</li>
+            </ul>
+          </div>
+          <div>
+            <div className="font-semibold text-white mb-3">সাপোর্ট</div>
+            <ul className="space-y-2 text-gray-400">
+              <li className="hover:text-orange-400 cursor-pointer">অর্ডার ট্র্যাকিং</li>
+              <li className="hover:text-orange-400 cursor-pointer">কীভাবে অর্ডার করবেন</li>
+              <li className="hover:text-orange-400 cursor-pointer">রিটার্ন পলিসি</li>
+              <li className="hover:text-orange-400 cursor-pointer">FAQ</li>
+            </ul>
+          </div>
+          <div>
+            <div className="font-semibold text-white mb-3">কেনাকাটা</div>
+            <ul className="space-y-2 text-gray-400">
+              {cats.slice(0, 5).map((c: any) => <li key={c.id} className="hover:text-orange-400 cursor-pointer">{c.name}</li>)}
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+          © 2026 Pickora. সর্বস্বত্ব সংরক্ষিত।
         </div>
       </footer>
     </div>

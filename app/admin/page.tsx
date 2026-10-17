@@ -14,8 +14,11 @@ export default function Admin() {
   const [orders, setOrders] = useState<any[]>([])
   const [cats, setCats] = useState<any[]>([])
   const [banners, setBanners] = useState<any[]>([])
+
+  const [editId, setEditId] = useState<number | null>(null)
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
+  const [oldPrice, setOldPrice] = useState('')
   const [category, setCategory] = useState('')
   const [stock, setStock] = useState('')
   const [imageUrl, setImageUrl] = useState('')
@@ -28,7 +31,6 @@ export default function Admin() {
   const [bUploading, setBUploading] = useState(false)
   const [bMsg, setBMsg] = useState('')
 
-  // ক্রপ
   const [cropSrc, setCropSrc] = useState('')
   const [cropAspect, setCropAspect] = useState(1)
   const [cropFor, setCropFor] = useState<'product' | 'banner'>('product')
@@ -65,13 +67,11 @@ export default function Admin() {
     return data.url || null
   }
 
-  // ফাইল বাছলে ক্রপার খুলবে
   function pickFile(file: File, forWhat: 'product' | 'banner') {
     setCropFor(forWhat)
     setCropAspect(forWhat === 'banner' ? 3 / 1 : 1)
     setCropSrc(URL.createObjectURL(file))
   }
-  // ক্রপ শেষে আপলোড
   async function onCropDone(blob: Blob) {
     const forWhat = cropFor
     setCropSrc('')
@@ -86,12 +86,24 @@ export default function Admin() {
     }
   }
 
-  async function addProduct() {
+  function startEdit(p: any) {
+    setEditId(p.id)
+    setName(p.name || ''); setPrice(String(p.price || '')); setOldPrice(p.old_price ? String(p.old_price) : '')
+    setCategory(p.category || ''); setStock(String(p.stock || '')); setImageUrl(p.image_url || '')
+    setMsg(''); window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  function cancelEdit() {
+    setEditId(null); setName(''); setPrice(''); setOldPrice(''); setCategory(''); setStock(''); setImageUrl(''); setMsg('')
+  }
+  async function saveProduct() {
     if (!name || !price) { setMsg('নাম ও দাম দিন।'); return }
-    const { error } = await supabase.from('products').insert({ name, price: Number(price), category, stock: Number(stock) || 0, image_url: imageUrl })
+    const payload = { name, price: Number(price), category, stock: Number(stock) || 0, image_url: imageUrl, old_price: oldPrice ? Number(oldPrice) : null }
+    let error
+    if (editId) { ({ error } = await supabase.from('products').update(payload).eq('id', editId)) }
+    else { ({ error } = await supabase.from('products').insert(payload)) }
     if (error) { setMsg('সমস্যা: ' + error.message); return }
-    setMsg('"' + name + '" যোগ হয়েছে ✅')
-    setName(''); setPrice(''); setCategory(''); setStock(''); setImageUrl(''); loadProducts()
+    setMsg(editId ? 'পণ্য আপডেট হয়েছে ✅' : '"' + name + '" যোগ হয়েছে ✅')
+    cancelEdit(); loadProducts()
   }
   async function del(id: number) { await supabase.from('products').delete().eq('id', id); loadProducts() }
   async function updateStatus(id: number, status: string) { await supabase.from('orders').update({ status }).eq('id', id); loadOrders() }
@@ -106,7 +118,7 @@ export default function Admin() {
   async function delBanner(id: number) { await supabase.from('banners').delete().eq('id', id); loadBanners() }
   async function toggleBanner(id: number, active: boolean) { await supabase.from('banners').update({ is_active: !active }).eq('id', id); loadBanners() }
 
-  const box = "w-full border border-gray-200 rounded-lg px-3 py-2 mb-2 text-sm"
+  const box = "w-full border-2 border-emerald-200 focus:border-emerald-500 outline-none rounded-lg px-3 py-2 mb-2 text-sm transition"
   const btn = "bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm"
 
   if (!user) return (
@@ -140,10 +152,11 @@ export default function Admin() {
 
       {tab === 'products' && (
         <>
-          <div className="bg-gray-50 border rounded-xl p-4 mb-5">
-            <h2 className="font-semibold mb-2">নতুন পণ্য যোগ</h2>
+          <div className={`border rounded-xl p-4 mb-5 ${editId ? 'bg-amber-50 border-amber-200' : 'bg-gray-50'}`}>
+            <h2 className="font-semibold mb-2">{editId ? '✏️ পণ্য সম্পাদনা' : 'নতুন পণ্য যোগ'}</h2>
             <input className={box} placeholder="পণ্যের নাম" value={name} onChange={e => setName(e.target.value)} />
-            <input className={box} type="number" placeholder="দাম (৳)" value={price} onChange={e => setPrice(e.target.value)} />
+            <input className={box} type="number" placeholder="দাম (৳) — কম সংখ্যা" value={price} onChange={e => setPrice(e.target.value)} />
+            <input className={box} type="number" placeholder="আসল দাম (৳) — বেশি সংখ্যা, ছাড় থাকলে" value={oldPrice} onChange={e => setOldPrice(e.target.value)} />
             <select className={box} value={category} onChange={e => setCategory(e.target.value)}>
               <option value="">ক্যাটাগরি বাছুন</option>
               {cats.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
@@ -153,7 +166,10 @@ export default function Admin() {
             <input type="file" accept="image/*" className="mb-2 text-sm" onChange={e => { const f = e.target.files?.[0]; if (f) pickFile(f, 'product'); e.target.value = '' }} />
             {uploading && <div className="text-sm text-amber-600 mb-2">আপলোড হচ্ছে…</div>}
             {imageUrl && <img src={imageUrl} alt="preview" className="w-20 h-20 object-cover rounded mb-2" />}
-            <button className={btn} onClick={addProduct}>পণ্য যোগ করুন</button>
+            <div className="flex gap-2">
+              <button className={btn} onClick={saveProduct}>{editId ? 'আপডেট করুন' : 'পণ্য যোগ করুন'}</button>
+              {editId && <button className="bg-gray-300 rounded-lg px-4 py-2 text-sm" onClick={cancelEdit}>বাতিল</button>}
+            </div>
             {msg && <div className="mt-2 text-emerald-600 text-sm">{msg}</div>}
           </div>
           <h2 className="font-semibold mb-2">সব পণ্য ({products.length})</h2>
@@ -162,8 +178,9 @@ export default function Admin() {
               {p.image_url && <img src={p.image_url} alt="" className="w-10 h-10 object-cover rounded" />}
               <div className="flex-1">
                 <div className="font-medium">{p.name}</div>
-                <div className="text-gray-500 text-xs">{p.category} · ৳{p.price} · স্টক: {p.stock}</div>
+                <div className="text-gray-500 text-xs">{p.category} · ৳{p.price}{p.old_price ? ` (আসল ৳${p.old_price})` : ''} · স্টক: {p.stock}</div>
               </div>
+              <button onClick={() => startEdit(p)} className="text-blue-600 border border-blue-200 rounded px-2 py-1 text-xs">এডিট</button>
               <button onClick={() => del(p.id)} className="text-red-500 border border-red-200 rounded px-2 py-1 text-xs">মুছুন</button>
             </div>
           ))}
