@@ -9,6 +9,8 @@ export default async function Home() {
   const { data: products } = await supabase.from('products').select('*').eq('is_active', true)
   const { data: catData } = await supabase.from('categories').select('*').order('id')
   const cats = catData || []
+  const { data: brandData } = await supabase.from('brands').select('*').order('id', { ascending: false })
+  const brands = brandData || []
 
   const catIcon: any = { 'ফ্যাশন': '👗', 'পোশাক': '👕', 'অর্গানিক খাবার': '🥗', 'খেলনা': '🧸', 'অন্যান্য': '🛍️', 'মধু': '🍯', 'তেল ও ঘি': '🫗', 'খেজুর': '🌴', 'মসলা': '🌶️' }
 
@@ -70,6 +72,20 @@ export default async function Home() {
           title="অন্যান্য পণ্য"
           products={(products || []).filter((p) => !cats.some((c: any) => c.name === p.category))}
         />
+
+        {/* Our Brands */}
+        {brands.length > 0 && (
+          <div className="mt-6 mb-4">
+            <h2 className="text-center text-xl font-bold mb-5">আমাদের ব্র্যান্ড</h2>
+            <div className="flex gap-4 overflow-x-auto pb-2 justify-start md:justify-center">
+              {brands.map((b: any) => (
+                <div key={b.id} className="flex-shrink-0 w-32 h-20 bg-white rounded-xl border border-gray-100 shadow-sm flex items-center justify-center p-3 hover:shadow-md transition">
+                  <img src={b.logo_url} alt={b.name} className="max-h-full max-w-full object-contain" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ট্রাস্ট ব্যাজ */}
         <div className="flex flex-wrap gap-4 justify-center bg-white rounded-xl p-4 mt-10 text-sm text-gray-600 shadow-sm">

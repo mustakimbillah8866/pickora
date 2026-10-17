@@ -1,12 +1,20 @@
 'use client'
 import { useCart } from './CartContext'
+import { useRouter } from 'next/navigation'
 
 export default function ProductCard({ p }: { p: any }) {
   const { add } = useCart()
+  const router = useRouter()
   const hasDiscount = p.old_price && p.old_price > p.price
+
+  function buyNow() {
+    add({ id: p.id, name: p.name, price: p.price })
+    router.push('/checkout')
+  }
+
   return (
     <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition group relative">
-      {/* ব্যাজ */}
+      {/* ছাড় ব্যাজ */}
       {hasDiscount && (
         <span className="absolute top-2 right-2 z-10 bg-red-500 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
           -{Math.round((1 - p.price / p.old_price) * 100)}%
@@ -20,9 +28,10 @@ export default function ProductCard({ p }: { p: any }) {
       </div>
       {/* তথ্য */}
       <div className="px-3 pb-3">
-        <div className="font-medium text-sm leading-snug min-h-[40px] line-clamp-2 mb-2">{p.name}</div>
+        <div className="font-medium text-sm leading-snug min-h-[40px] line-clamp-2 mb-1">{p.name}</div>
+        <div className="text-gray-400 text-xs mt-0.5 mb-1">{p.brand ? `${p.brand} · ` : ''}{p.category}</div>
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="font-bold text-emerald-600 text-base">৳{Number(p.price).toLocaleString('bn-BD')}</span>
+          <span className="font-bold text-orange-600 text-base">৳{Number(p.price).toLocaleString('bn-BD')}</span>
           {hasDiscount && <span className="text-gray-400 text-xs line-through">৳{Number(p.old_price).toLocaleString('bn-BD')}</span>}
         </div>
         {hasDiscount && (
@@ -30,11 +39,18 @@ export default function ProductCard({ p }: { p: any }) {
             Save ৳{Number(p.old_price - p.price).toLocaleString('bn-BD')}
           </div>
         )}
-        <button
-          onClick={() => add({ id: p.id, name: p.name, price: p.price })}
-          className="w-full mt-1 py-2 border border-emerald-600 text-emerald-700 hover:bg-emerald-600 hover:text-white rounded-lg text-sm font-medium transition flex items-center justify-center gap-1.5 active:scale-95">
-          🛒 কার্টে যোগ
-        </button>
+        <div className="flex gap-1.5 mt-1">
+          <button
+            onClick={() => add({ id: p.id, name: p.name, price: p.price })}
+            className="flex-1 py-2 border border-orange-500 text-orange-600 hover:bg-orange-50 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1 active:scale-95">
+            🛒 কার্টে
+          </button>
+          <button
+            onClick={buyNow}
+            className="flex-1 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-medium transition active:scale-95">
+            Buy now
+          </button>
+        </div>
       </div>
     </div>
   )
