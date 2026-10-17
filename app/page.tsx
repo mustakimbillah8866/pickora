@@ -2,6 +2,7 @@ export const instant = false
 import { supabase } from './supabaseClient'
 import ProductCard from './ProductCard'
 import CartButton from './CartButton'
+import HeroBanner from './HeroBanner'
 
 export default async function Home() {
   const { data: products } = await supabase
@@ -36,12 +37,7 @@ export default async function Home() {
       </header>
 
       {/* হিরো */}
-      <section className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-10 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">ঘরের সব প্রয়োজন, এক ঠিকানায়</h1>
-          <p className="opacity-90">ফ্যাশন · পোশাক · খাঁটি খাবার · খেলনা — বাছাই করা পণ্য সেরা দামে</p>
-        </div>
-      </section>
+      <HeroBanner />
 
       <main className="max-w-6xl mx-auto px-4 py-6">
         {/* ক্যাটাগরি */}
