@@ -62,9 +62,9 @@ export default function ProductDetail() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 bg-white rounded-2xl border border-gray-100 p-5 md:p-8 shadow-sm">
-        <div className="bg-white rounded-xl flex items-center justify-center overflow-hidden min-h-[320px] md:min-h-[420px] border border-gray-50">
+        <div className="bg-white rounded-xl flex items-start justify-center overflow-hidden border border-gray-50 p-4 md:sticky md:top-20 self-start">
           {p.image_url
-            ? <img src={p.image_url} alt={p.name} className="max-h-[420px] max-w-full object-contain" />
+            ? <img src={p.image_url} alt={p.name} className="max-h-[340px] w-auto max-w-full object-contain" />
             : <span className="text-7xl text-gray-200">📦</span>}
         </div>
 
