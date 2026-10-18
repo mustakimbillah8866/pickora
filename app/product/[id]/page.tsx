@@ -12,6 +12,7 @@ export default function ProductDetail() {
   const [p, setP] = useState<any>(null)
   const [related, setRelated] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -44,10 +45,19 @@ export default function ProductDetail() {
 
   const hasDiscount = p.old_price && p.old_price > p.price
   const inStock = p.stock > 0
+  const lowStock = inStock && p.stock <= 5
+  const productCode = `PICK-${p.id}`
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : ''
 
   function buyNow() {
     add({ id: p.id, name: p.name, price: p.price, image: p.image_url })
     router.push('/checkout')
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(pageUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
@@ -69,7 +79,10 @@ export default function ProductDetail() {
         {/* ডানে — তথ্য */}
         <div className="flex flex-col">
           <div className="text-xs text-gray-400 mb-1">{p.brand ? `${p.brand} · ` : ''}{p.category}</div>
-          <h1 className="text-2xl font-bold leading-snug mb-3">{p.name}</h1>
+          <h1 className="text-2xl font-bold leading-snug mb-1">{p.name}</h1>
+
+          {/* Product Code */}
+          <div className="text-xs text-gray-400 mb-3">পণ্য কোড: <span className="font-medium text-gray-600">{productCode}</span></div>
 
           <div className="flex items-center gap-3 mb-3">
             <span className="text-3xl font-bold text-orange-600">৳{Number(p.price).toLocaleString('bn-BD')}</span>
@@ -91,9 +104,18 @@ export default function ProductDetail() {
 
           {/* স্টক */}
           <div className="mb-4">
-            {inStock
-              ? <span className="text-green-600 text-sm font-medium">✓ স্টকে আছে ({p.stock}টি)</span>
-              : <span className="text-red-500 text-sm font-medium">✗ স্টকে নেই</span>}
+            {inStock ? (
+              <div>
+                <span className="text-green-600 text-sm font-medium">✓ স্টকে আছে ({p.stock}টি)</span>
+                {lowStock && (
+                  <div className="mt-1 text-red-500 text-xs font-medium bg-red-50 rounded px-2 py-1 inline-block">
+                    ⚠️ মাত্র {p.stock}টি বাকি! স্টক আউটের আগেই অর্ডার করুন
+                  </div>
+                )}
+              </div>
+            ) : (
+              <span className="text-red-500 text-sm font-medium">✗ স্টকে নেই</span>
+            )}
           </div>
 
           {/* বর্ণনা */}
@@ -117,6 +139,24 @@ export default function ProductDetail() {
               disabled={!inStock}
               className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
               এখনই কিনুন
+            </button>
+          </div>
+
+          {/* Share */}
+          <div className="flex items-center gap-2 mt-5 pt-4 border-t border-gray-100">
+            <span className="text-xs text-gray-400">শেয়ার:</span>
+            <a
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`}
+              target="_blank" rel="noopener noreferrer"
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition text-sm">f</a>
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(p.name + ' - ' + pageUrl)}`}
+              target="_blank" rel="noopener noreferrer"
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-green-50 text-green-600 hover:bg-green-100 transition text-sm">🟢</a>
+            <button
+              onClick={copyLink}
+              className="text-xs text-gray-500 border border-gray-200 rounded-full px-3 py-1 hover:bg-gray-50 transition">
+              {copied ? '✓ কপি হয়েছে' : '🔗 লিংক কপি'}
             </button>
           </div>
         </div>
