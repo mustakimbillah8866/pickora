@@ -49,7 +49,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
   function inc(id: number) { setItems(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i)) }
   function dec(id: number) { setItems(prev => prev.flatMap(i => i.id === id ? (i.qty > 1 ? [{ ...i, qty: i.qty - 1 }] : []) : [i])) }
-  function remove(id: number) { setItems(prev => prev.filter(i => i.id !== id)) }
+function remove(id: number) {
+  setItems(prev => prev.filter(i => i.id !== id))
+  showToast('🗑️ পণ্য সরানো হয়েছে')
+}
   function clear() { setItems([]) }
 
   const total = items.reduce((s, i) => s + i.price * i.qty, 0)
