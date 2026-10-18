@@ -27,6 +27,10 @@ export default function Admin() {
   const [country, setCountry] = useState('')
   const [weight, setWeight] = useState('')
   const [ingredients, setIngredients] = useState('')
+  const [specs, setSpecs] = useState('')
+  const [summary, setSummary] = useState('')
+  const [features, setFeatures] = useState('')
+  const [faq, setFaq] = useState('')
   const [msg, setMsg] = useState('')
 
   const [bImage, setBImage] = useState('')
@@ -110,16 +114,17 @@ export default function Admin() {
   function startEdit(p: any) {
     setEditId(p.id); setName(p.name || ''); setPrice(String(p.price || '')); setOldPrice(p.old_price ? String(p.old_price) : '')
     setCategory(p.category || ''); setBrand(p.brand || ''); setStock(String(p.stock || '')); setImageUrl(p.image_url || '')
-    setCountry(p.country || ''); setWeight(p.weight || ''); setIngredients(p.ingredients || ''); setMsg('')
+    setCountry(p.country || ''); setWeight(p.weight || ''); setIngredients(p.ingredients || '')
+    setSpecs(p.specs || ''); setSummary(p.summary || ''); setFeatures(p.features || ''); setFaq(p.faq || ''); setMsg('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   function cancelEdit() {
     setEditId(null); setName(''); setPrice(''); setOldPrice(''); setCategory(''); setBrand(''); setStock(''); setImageUrl('')
-    setCountry(''); setWeight(''); setIngredients(''); setMsg('')
+    setCountry(''); setWeight(''); setIngredients(''); setSpecs(''); setSummary(''); setFeatures(''); setFaq(''); setMsg('')
   }
   async function saveProduct() {
     if (!name || !price) { setMsg('নাম ও দাম দিন।'); return }
-    const payload = { name, price: Number(price), category, brand, stock: Number(stock) || 0, image_url: imageUrl, old_price: oldPrice ? Number(oldPrice) : null, country, weight, ingredients }
+    const payload = { name, price: Number(price), category, brand, stock: Number(stock) || 0, image_url: imageUrl, old_price: oldPrice ? Number(oldPrice) : null, country, weight, ingredients, specs, summary, features, faq }
     let error
     if (editId) { ({ error } = await supabase.from('products').update(payload).eq('id', editId)) }
     else { ({ error } = await supabase.from('products').insert(payload)) }
@@ -204,6 +209,14 @@ export default function Admin() {
             <input className={box} placeholder="ওজন/পরিমাণ (যেমন: ৬০ গ্রাম) — ঐচ্ছিক" value={weight} onChange={e => setWeight(e.target.value)} />
             <input className={box} placeholder="উৎপাদন দেশ (যেমন: বাংলাদেশ) — ঐচ্ছিক" value={country} onChange={e => setCountry(e.target.value)} />
             <input className={box} placeholder="উপাদান (যেমন: ১০০% প্রাকৃতিক) — ঐচ্ছিক" value={ingredients} onChange={e => setIngredients(e.target.value)} />
+            <label className="block text-sm mb-1 mt-2 text-gray-600 font-medium">📋 বিস্তারিত স্পেসিফিকেশন (প্রতি লাইনে — নাম: মান):</label>
+            <textarea className={box} rows={5} placeholder={"ওয়ারেন্টি: ৬ মাস\nমডেল: KP-2274\nরঙ: কালো\nউচ্চতা: 167cm"} value={specs} onChange={e => setSpecs(e.target.value)} />
+            <label className="block text-sm mb-1 text-gray-600 font-medium">📝 সারসংক্ষেপ (Summary):</label>
+            <textarea className={box} rows={3} placeholder="পণ্যটি সম্পর্কে ২-৩ লাইন..." value={summary} onChange={e => setSummary(e.target.value)} />
+            <label className="block text-sm mb-1 text-gray-600 font-medium">⭐ মূল বৈশিষ্ট্য (প্রতি লাইনে একটা):</label>
+            <textarea className={box} rows={4} placeholder={"১০০% অরিজিনাল\nদ্রুত ডেলিভারি\n৬ মাস ওয়ারেন্টি"} value={features} onChange={e => setFeatures(e.target.value)} />
+            <label className="block text-sm mb-1 text-gray-600 font-medium">❓ প্রশ্ন-উত্তর (প্রতি লাইনে — প্রশ্ন | উত্তর):</label>
+            <textarea className={box} rows={4} placeholder={"এটা কি আসল? | হ্যাঁ, ১০০% আসল।\nডেলিভারিতে কত দিন? | ২-৩ দিন।"} value={faq} onChange={e => setFaq(e.target.value)} />
             <label className="block text-sm mb-1 text-gray-600">পণ্যের ছবি (বর্গাকার):</label>
             <input type="file" accept="image/*" className="mb-2 text-sm" onChange={e => { const f = e.target.files?.[0]; if (f) pickFile(f, 'product'); e.target.value = '' }} />
             {imageUrl && <img src={imageUrl} alt="preview" className="w-20 h-20 object-cover rounded mb-2" />}
