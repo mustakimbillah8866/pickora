@@ -1,4 +1,3 @@
-export const instant = false
 import { supabase } from './supabaseClient'
 import ProductCard from './ProductCard'
 import CartButton from './CartButton'
