@@ -24,6 +24,9 @@ export default function Admin() {
   const [brand, setBrand] = useState('')
   const [stock, setStock] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [country, setCountry] = useState('')
+  const [weight, setWeight] = useState('')
+  const [ingredients, setIngredients] = useState('')
   const [msg, setMsg] = useState('')
 
   const [bImage, setBImage] = useState('')
@@ -106,13 +109,14 @@ export default function Admin() {
 
   function startEdit(p: any) {
     setEditId(p.id); setName(p.name || ''); setPrice(String(p.price || '')); setOldPrice(p.old_price ? String(p.old_price) : '')
-    setCategory(p.category || ''); setBrand(p.brand || ''); setStock(String(p.stock || '')); setImageUrl(p.image_url || ''); setMsg('')
+    setCategory(p.category || ''); setBrand(p.brand || ''); setStock(String(p.stock || '')); setImageUrl(p.image_url || '')
+    setCountry(p.country || ''); setWeight(p.weight || ''); setIngredients(p.ingredients || ''); setMsg('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-  function cancelEdit() { setEditId(null); setName(''); setPrice(''); setOldPrice(''); setCategory(''); setBrand(''); setStock(''); setImageUrl(''); setMsg('') }
+  function cancelEdit() { setEditId(null); setName(''); setPrice(''); setOldPrice(''); setCategory(''); setBrand(''); setStock(''); setImageUrl(''); setCountry(''); setWeight(''); setIngredients(''); setMsg('') }
   async function saveProduct() {
     if (!name || !price) { setMsg('নাম ও দাম দিন।'); return }
-    const payload = { name, price: Number(price), category, brand, stock: Number(stock) || 0, image_url: imageUrl, old_price: oldPrice ? Number(oldPrice) : null }
+    const payload = { name, price: Number(price), category, brand, stock: Number(stock) || 0, image_url: imageUrl, old_price: oldPrice ? Number(oldPrice) : null, country, weight, ingredients }
     let error
     if (editId) { ({ error } = await supabase.from('products').update(payload).eq('id', editId)) }
     else { ({ error } = await supabase.from('products').insert(payload)) }
@@ -194,6 +198,9 @@ export default function Admin() {
               {brands.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
             </select>
             <input className={box} type="number" placeholder="স্টক" value={stock} onChange={e => setStock(e.target.value)} />
+            <input className={box} placeholder="ওজন/পরিমাণ (যেমন: ৬০ গ্রাম) — ঐচ্ছিক" value={weight} onChange={e => setWeight(e.target.value)} />
+            <input className={box} placeholder="উৎপাদন দেশ (যেমন: বাংলাদেশ) — ঐচ্ছিক" value={country} onChange={e => setCountry(e.target.value)} />
+            <input className={box} placeholder="উপাদান (যেমন: ১০০% প্রাকৃতিক) — ঐচ্ছিক" value={ingredients} onChange={e => setIngredients(e.target.value)} />
             <label className="block text-sm mb-1 text-gray-600">পণ্যের ছবি (বর্গাকার):</label>
             <input type="file" accept="image/*" className="mb-2 text-sm" onChange={e => { const f = e.target.files?.[0]; if (f) pickFile(f, 'product'); e.target.value = '' }} />
             {imageUrl && <img src={imageUrl} alt="preview" className="w-20 h-20 object-cover rounded mb-2" />}

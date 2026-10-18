@@ -126,6 +126,43 @@ export default function ProductDetail() {
             </div>
           )}
 
+                    {/* Specification টেবিল */}
+          {(p.weight || p.country || p.ingredients) && (
+            <div className="mb-5">
+              <div className="font-semibold text-sm mb-2">পণ্যের বিবরণ</div>
+              <table className="w-full text-sm border border-gray-100 rounded-lg overflow-hidden">
+                <tbody>
+                  <tr className="border-b border-gray-100">
+                    <td className="bg-gray-50 px-3 py-2 text-gray-500 w-1/3">নাম</td>
+                    <td className="px-3 py-2">{p.name}</td>
+                  </tr>
+                  <tr className="border-b border-gray-100">
+                    <td className="bg-gray-50 px-3 py-2 text-gray-500">ক্যাটাগরি</td>
+                    <td className="px-3 py-2">{p.category}</td>
+                  </tr>
+                  {p.weight && (
+                    <tr className="border-b border-gray-100">
+                      <td className="bg-gray-50 px-3 py-2 text-gray-500">ওজন/পরিমাণ</td>
+                      <td className="px-3 py-2">{p.weight}</td>
+                    </tr>
+                  )}
+                  {p.country && (
+                    <tr className="border-b border-gray-100">
+                      <td className="bg-gray-50 px-3 py-2 text-gray-500">উৎপাদন দেশ</td>
+                      <td className="px-3 py-2">{p.country}</td>
+                    </tr>
+                  )}
+                  {p.ingredients && (
+                    <tr>
+                      <td className="bg-gray-50 px-3 py-2 text-gray-500">উপাদান</td>
+                      <td className="px-3 py-2">{p.ingredients}</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
           {/* বাটন */}
           <div className="flex gap-3 mt-auto">
             <button
