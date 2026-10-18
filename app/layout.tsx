@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "./CartContext";
+import Header from "./Header";
+import Footer from "./Footer";
 
 export const metadata: Metadata = {
   title: "Pickora",
@@ -13,7 +15,11 @@ export default function RootLayout({
   return (
     <html lang="bn">
       <body>
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          <Header />
+          <div className="min-h-screen bg-gray-50 text-gray-800">{children}</div>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );
