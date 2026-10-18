@@ -1,3 +1,4 @@
+export const revalidate = 0
 import { supabase } from './supabaseClient'
 import ProductCard from './ProductCard'
 import CartButton from './CartButton'
