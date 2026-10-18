@@ -44,6 +44,9 @@ export default function ProductDetail() {
   const lowStock = inStock && p.stock <= 5
   const productCode = `PICK-${p.id}`
   const pageUrl = typeof window !== 'undefined' ? window.location.href : ''
+  const specRows = p.specs ? p.specs.split('\n').filter((l: string) => l.includes(':')) : []
+  const featureList = p.features ? p.features.split('\n').filter((l: string) => l.trim()) : []
+  const faqList = p.faq ? p.faq.split('\n').filter((l: string) => l.includes('|')) : []
 
   function buyNow() {
     add({ id: p.id, name: p.name, price: p.price, image: p.image_url })
@@ -56,19 +59,25 @@ export default function ProductDetail() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
+      {/* breadcrumb */}
       <div className="text-xs text-gray-400 mb-4">
         <span className="cursor-pointer hover:text-orange-600" onClick={() => router.push('/')}>হোম</span>
         {' › '}{p.category}{' › '}<span className="text-gray-600">{p.name}</span>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 bg-white rounded-2xl border border-gray-100 p-5 md:p-8 shadow-sm">
-        <div className="bg-white rounded-xl flex items-start justify-center overflow-hidden border border-gray-50 p-4 md:sticky md:top-20 self-start">
-          {p.image_url
-            ? <img src={p.image_url} alt={p.name} className="max-h-[340px] w-auto max-w-full object-contain" />
-            : <span className="text-7xl text-gray-200">📦</span>}
+      {/* উপরের অংশ — ছবি + কেনার তথ্য */}
+      <div className="grid md:grid-cols-5 gap-6 bg-white rounded-2xl border border-gray-100 p-5 md:p-6 shadow-sm">
+        {/* বাঁয়ে — ছবি (২ কলাম) */}
+        <div className="md:col-span-2 flex items-start justify-center">
+          <div className="bg-white rounded-xl border border-gray-100 p-4 flex items-center justify-center w-full">
+            {p.image_url
+              ? <img src={p.image_url} alt={p.name} className="max-h-[300px] w-auto max-w-full object-contain" />
+              : <span className="text-7xl text-gray-200">📦</span>}
+          </div>
         </div>
 
-        <div className="flex flex-col">
+        {/* ডানে — তথ্য (৩ কলাম) */}
+        <div className="md:col-span-3 flex flex-col">
           <div className="text-xs text-gray-400 mb-1">{p.brand ? `${p.brand} · ` : ''}{p.category}</div>
           <h1 className="text-2xl font-bold leading-snug mb-1">{p.name}</h1>
           <div className="text-xs text-gray-400 mb-3">পণ্য কোড: <span className="font-medium text-gray-600">{productCode}</span></div>
@@ -99,69 +108,7 @@ export default function ProductDetail() {
           </div>
 
           {p.description && (
-            <div className="mb-5">
-              <div className="font-semibold text-sm mb-1">বিবরণ</div>
-              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{p.description}</p>
-            </div>
-          )}
-
-          {/* বিস্তারিত স্পেসিফিকেশন টেবিল */}
-          {(p.specs || p.weight || p.country || p.ingredients) && (
-            <div className="mb-5">
-              <div className="font-semibold text-sm mb-2">পণ্যের বিবরণ</div>
-              <table className="w-full text-sm border border-gray-100 rounded-lg overflow-hidden">
-                <tbody>
-                  <tr className="border-b border-gray-100"><td className="bg-gray-50 px-3 py-2 text-gray-500 w-1/3">নাম</td><td className="px-3 py-2">{p.name}</td></tr>
-                  <tr className="border-b border-gray-100"><td className="bg-gray-50 px-3 py-2 text-gray-500">ক্যাটাগরি</td><td className="px-3 py-2">{p.category}</td></tr>
-                  {p.weight && <tr className="border-b border-gray-100"><td className="bg-gray-50 px-3 py-2 text-gray-500">ওজন/পরিমাণ</td><td className="px-3 py-2">{p.weight}</td></tr>}
-                  {p.country && <tr className="border-b border-gray-100"><td className="bg-gray-50 px-3 py-2 text-gray-500">উৎপাদন দেশ</td><td className="px-3 py-2">{p.country}</td></tr>}
-                  {p.ingredients && <tr className="border-b border-gray-100"><td className="bg-gray-50 px-3 py-2 text-gray-500">উপাদান</td><td className="px-3 py-2">{p.ingredients}</td></tr>}
-                  {p.specs && p.specs.split('\n').filter((l: string) => l.includes(':')).map((line: string, idx: number) => {
-                    const i = line.indexOf(':'); const k = line.slice(0, i).trim(); const v = line.slice(i + 1).trim()
-                    if (!k || !v) return null
-                    return <tr key={idx} className="border-b border-gray-100"><td className="bg-gray-50 px-3 py-2 text-gray-500">{k}</td><td className="px-3 py-2">{v}</td></tr>
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* সারসংক্ষেপ */}
-          {p.summary && (
-            <div className="mb-5">
-              <div className="font-semibold text-sm mb-1">সারসংক্ষেপ</div>
-              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{p.summary}</p>
-            </div>
-          )}
-
-          {/* মূল বৈশিষ্ট্য */}
-          {p.features && (
-            <div className="mb-5">
-              <div className="font-semibold text-sm mb-2">মূল বৈশিষ্ট্য</div>
-              <ul className="space-y-1">
-                {p.features.split('\n').filter((l: string) => l.trim()).map((f: string, idx: number) => (
-                  <li key={idx} className="text-sm text-gray-600 flex gap-2"><span className="text-green-500">✓</span>{f.trim()}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* প্রশ্ন-উত্তর */}
-          {p.faq && (
-            <div className="mb-5">
-              <div className="font-semibold text-sm mb-2">সাধারণ প্রশ্ন (FAQ)</div>
-              <div className="space-y-2">
-                {p.faq.split('\n').filter((l: string) => l.includes('|')).map((line: string, idx: number) => {
-                  const [q, a] = line.split('|')
-                  return (
-                    <div key={idx} className="bg-gray-50 rounded-lg p-3">
-                      <div className="text-sm font-medium text-gray-800">{q.trim()}</div>
-                      <div className="text-sm text-gray-500 mt-0.5">{a?.trim()}</div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
+            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line mb-4">{p.description}</p>
           )}
 
           <div className="flex gap-3 mt-auto">
@@ -171,7 +118,7 @@ export default function ProductDetail() {
               className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">এখনই কিনুন</button>
           </div>
 
-          <div className="flex items-center gap-2 mt-5 pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
             <span className="text-xs text-gray-400">শেয়ার:</span>
             <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`} target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition text-sm">f</a>
             <a href={`https://wa.me/?text=${encodeURIComponent(p.name + ' - ' + pageUrl)}`} target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full bg-green-50 text-green-600 hover:bg-green-100 transition text-sm">🟢</a>
@@ -180,8 +127,71 @@ export default function ProductDetail() {
         </div>
       </div>
 
+      {/* নিচের অংশ — পুরো চওড়ায় (Rokomari স্টাইল) */}
+      <div className="mt-6 space-y-5">
+        {/* Specification টেবিল */}
+        {(specRows.length > 0 || p.weight || p.country || p.ingredients) && (
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 md:p-6 shadow-sm">
+            <h2 className="font-bold text-lg mb-3">পণ্যের বিবরণ</h2>
+            <table className="w-full text-sm border border-gray-100 rounded-lg overflow-hidden">
+              <tbody>
+                <tr className="border-b border-gray-100"><td className="bg-gray-50 px-4 py-2.5 text-gray-500 w-1/3">নাম</td><td className="px-4 py-2.5">{p.name}</td></tr>
+                <tr className="border-b border-gray-100"><td className="bg-gray-50 px-4 py-2.5 text-gray-500">ক্যাটাগরি</td><td className="px-4 py-2.5">{p.category}</td></tr>
+                {p.weight && <tr className="border-b border-gray-100"><td className="bg-gray-50 px-4 py-2.5 text-gray-500">ওজন/পরিমাণ</td><td className="px-4 py-2.5">{p.weight}</td></tr>}
+                {p.country && <tr className="border-b border-gray-100"><td className="bg-gray-50 px-4 py-2.5 text-gray-500">উৎপাদন দেশ</td><td className="px-4 py-2.5">{p.country}</td></tr>}
+                {p.ingredients && <tr className="border-b border-gray-100"><td className="bg-gray-50 px-4 py-2.5 text-gray-500">উপাদান</td><td className="px-4 py-2.5">{p.ingredients}</td></tr>}
+                {specRows.map((line: string, idx: number) => {
+                  const i = line.indexOf(':'); const k = line.slice(0, i).trim(); const v = line.slice(i + 1).trim()
+                  if (!k || !v) return null
+                  return <tr key={idx} className="border-b border-gray-100"><td className="bg-gray-50 px-4 py-2.5 text-gray-500">{k}</td><td className="px-4 py-2.5">{v}</td></tr>
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* সারসংক্ষেপ */}
+        {p.summary && (
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 md:p-6 shadow-sm">
+            <h2 className="font-bold text-lg mb-2">সারসংক্ষেপ</h2>
+            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{p.summary}</p>
+          </div>
+        )}
+
+        {/* মূল বৈশিষ্ট্য */}
+        {featureList.length > 0 && (
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 md:p-6 shadow-sm">
+            <h2 className="font-bold text-lg mb-3">মূল বৈশিষ্ট্য</h2>
+            <ul className="space-y-2">
+              {featureList.map((f: string, idx: number) => (
+                <li key={idx} className="text-sm text-gray-600 flex gap-2"><span className="text-green-500">✓</span>{f.trim()}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* FAQ */}
+        {faqList.length > 0 && (
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 md:p-6 shadow-sm">
+            <h2 className="font-bold text-lg mb-3">সাধারণ প্রশ্ন (FAQ)</h2>
+            <div className="space-y-2">
+              {faqList.map((line: string, idx: number) => {
+                const [q, a] = line.split('|')
+                return (
+                  <div key={idx} className="bg-gray-50 rounded-lg p-3">
+                    <div className="text-sm font-medium text-gray-800">{q.trim()}</div>
+                    <div className="text-sm text-gray-500 mt-0.5">{a?.trim()}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* একই ক্যাটাগরির আরও পণ্য */}
       {related.length > 0 && (
-        <div className="mt-10">
+        <div className="mt-8">
           <h2 className="text-lg font-bold mb-4">একই ক্যাটাগরির আরও পণ্য</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {related.map(rp => <ProductCard key={rp.id} p={rp} />)}
