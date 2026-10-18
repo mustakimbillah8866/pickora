@@ -113,7 +113,10 @@ export default function Admin() {
     setCountry(p.country || ''); setWeight(p.weight || ''); setIngredients(p.ingredients || ''); setMsg('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-  function cancelEdit() { setEditId(null); setName(''); setPrice(''); setOldPrice(''); setCategory(''); setBrand(''); setStock(''); setImageUrl(''); setCountry(''); setWeight(''); setIngredients(''); setMsg('') }
+  function cancelEdit() {
+    setEditId(null); setName(''); setPrice(''); setOldPrice(''); setCategory(''); setBrand(''); setStock(''); setImageUrl('')
+    setCountry(''); setWeight(''); setIngredients(''); setMsg('')
+  }
   async function saveProduct() {
     if (!name || !price) { setMsg('নাম ও দাম দিন।'); return }
     const payload = { name, price: Number(price), category, brand, stock: Number(stock) || 0, image_url: imageUrl, old_price: oldPrice ? Number(oldPrice) : null, country, weight, ingredients }
